@@ -589,7 +589,6 @@ int esp_xtensa_smp_run_onboard_func(struct target *target,
 
 int esp_xtensa_smp_init_arch_info(struct target *target,
 	struct esp_xtensa_smp_common *esp_xtensa_smp,
-	const struct xtensa_config *xtensa_cfg,
 	struct xtensa_debug_module_config *dm_cfg,
 	const struct esp_flash_breakpoint_ops *flash_brps_ops,
 	const struct esp_xtensa_smp_chip_ops *chip_ops,
@@ -597,7 +596,6 @@ int esp_xtensa_smp_init_arch_info(struct target *target,
 {
 	int ret = esp_xtensa_init_arch_info(target,
 		&esp_xtensa_smp->esp_xtensa,
-		xtensa_cfg,
 		dm_cfg,
 		flash_brps_ops,
 		semihost_ops);

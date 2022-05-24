@@ -151,12 +151,14 @@
 #define OCDDSR_BREAKINITI           BIT(26)
 #define OCDDSR_DBGMODPOWERON        BIT(31)
 
+/* LX stop cause */
 #define DEBUGCAUSE_IC               BIT(0)	/* ICOUNT exception */
 #define DEBUGCAUSE_IB               BIT(1)	/* IBREAK exception */
 #define DEBUGCAUSE_DB               BIT(2)	/* DBREAK exception */
 #define DEBUGCAUSE_BI               BIT(3)	/* BREAK instruction encountered */
 #define DEBUGCAUSE_BN               BIT(4)	/* BREAK.N instruction encountered */
 #define DEBUGCAUSE_DI               BIT(5)	/* Debug Interrupt */
+#define DEBUGCAUSE_VALID            BIT(31)	/* Pseudo-value to trigger reread (NX only) */
 
 #define TRAXCTRL_TREN               BIT(0)	/* Trace enable. Tracing starts on 0->1 */
 #define TRAXCTRL_TRSTP              BIT(1)	/* Trace Stop. Make 1 to stop trace. */

@@ -22,7 +22,7 @@
 
 #include <target/target.h>
 #include <helper/command.h>
-#include <target/xtensa/xtensa.h>
+#include <target/xtensa/xtensa_chip.h>
 #include "esp.h"
 #include "esp_xtensa_apptrace.h"
 #include "esp_xtensa_semihosting.h"
@@ -41,7 +41,6 @@ static inline struct esp_xtensa_common *target_to_esp_xtensa(struct target *targ
 
 int esp_xtensa_init_arch_info(struct target *target,
 	struct esp_xtensa_common *esp_xtensa,
-	const struct xtensa_config *xtensa_cfg,
 	struct xtensa_debug_module_config *dm_cfg,
 	const struct esp_flash_breakpoint_ops *spec_brps_ops,
 	const struct esp_semihost_ops *semihost_ops);

@@ -20,6 +20,7 @@
 #define OPENOCD_TARGET_XTENSA_ALGO_H
 
 #include <target/espressif/esp_algorithm.h>
+#include "xtensa_chip.h"
 #include "xtensa.h"
 
 /** Index of the first user-defined algo arg. @see algorithm_stub */

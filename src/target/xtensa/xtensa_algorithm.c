@@ -20,6 +20,7 @@
 #include <config.h>
 #endif
 
+#include "xtensa_chip.h"
 #include "xtensa.h"
 #include "xtensa_algorithm.h"
 

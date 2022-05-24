@@ -88,6 +88,7 @@ extern struct target_type fa526_target;
 extern struct target_type feroceon_target;
 extern struct target_type dragonite_target;
 extern struct target_type xscale_target;
+extern struct target_type xtensa_chip_target;
 extern struct target_type cortexm_target;
 extern struct target_type cortexa_target;
 extern struct target_type aarch64_target;
@@ -130,6 +131,7 @@ static struct target_type *target_types[] = {
 	&feroceon_target,
 	&dragonite_target,
 	&xscale_target,
+	&xtensa_chip_target,
 	&cortexm_target,
 	&cortexa_target,
 	&cortexr4_target,
@@ -1521,6 +1523,20 @@ int target_gdb_fileio_end(struct target *target, int retcode, int fileio_errno, 
 		return ERROR_TARGET_NOT_HALTED;
 	}
 	return target->type->gdb_fileio_end(target, retcode, fileio_errno, ctrl_c);
+}
+
+bool target_supports_gdb_query_custom(struct target *target)
+{
+	return target->type->gdb_query_custom;
+}
+
+int target_gdb_query_custom(struct target *target, const char *packet, char **response_p)
+{
+	if (!target->type->gdb_query_custom) {
+		LOG_ERROR("Target %s doesn't support gdb_query_custom", target_name(target));
+		return ERROR_FAIL;
+	}
+	return target->type->gdb_query_custom(target, packet, response_p);
 }
 
 target_addr_t target_address_max(struct target *target)

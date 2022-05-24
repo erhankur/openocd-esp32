@@ -21,7 +21,7 @@
 #include <unistd.h>
 #include <target/target.h>
 #include <helper/command.h>
-#include <target/xtensa/xtensa.h>
+#include <target/xtensa/xtensa_chip.h>
 #include <target/semihosting_common.h>
 #include "esp_xtensa.h"
 #include "esp_semihosting.h"

@@ -21,8 +21,8 @@
 
 #include "esp_xtensa_semihosting.h"
 
-#define ESP_XTENSA_SYSCALL_LEGACY       XT_INS_BREAK(1, 1)
-#define ESP_XTENSA_SYSCALL              XT_INS_BREAK(1, 14)
+#define ESP_XTENSA_SYSCALL_LEGACY       XT_INS_BREAK_LE(1, 1)
+#define ESP_XTENSA_SYSCALL              XT_INS_BREAK_LE(1, 14)
 #define ESP_XTENSA_SYSCALL_SZ           3
 
 #define ESP_FD_MIN                      2

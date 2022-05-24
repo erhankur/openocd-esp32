@@ -209,7 +209,7 @@
 #include "config.h"
 #endif
 
-#include <target/xtensa/xtensa.h>
+#include <target/xtensa/xtensa_chip.h>
 #include <target/xtensa/xtensa_debug_module.h>
 #include "esp_xtensa_apptrace.h"
 

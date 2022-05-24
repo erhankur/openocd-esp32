@@ -55,6 +55,7 @@ static const struct stack_register_offset rtos_freertos_esp32_stack_offsets[] = 
 	{ XT_REG_IDX_AR13, 0x40, 32 },		/* A13 */
 	{ XT_REG_IDX_AR14, 0x44, 32 },		/* A14 */
 	{ XT_REG_IDX_AR15, 0x48, 32 },		/* A15 */
+#if 0	// TODO: how to handle this...
 	{ XT_REG_IDX_AR16, -1, 32 },		/* A16 */ /* A16-A63 aren't in the stack frame because they've been flushed to the stack earlier */
 	{ XT_REG_IDX_AR17, -1, 32 },		/* A17 */
 	{ XT_REG_IDX_AR18, -1, 32 },		/* A18 */
@@ -143,6 +144,7 @@ static const struct stack_register_offset rtos_freertos_esp32_stack_offsets[] = 
 	{ XT_REG_IDX_F15, -1, 32 },		/* f15 */
 	{ XT_REG_IDX_FCR, -1, 32 },		/* fcr */
 	{ XT_REG_IDX_FSR, -1, 32 },		/* fsr */
+#endif
 };
 
 static const struct stack_register_offset rtos_freertos_esp32_s2_stack_offsets[] = {
@@ -163,6 +165,7 @@ static const struct stack_register_offset rtos_freertos_esp32_s2_stack_offsets[]
 	{ XT_REG_IDX_AR13, 0x40, 32 },		/* A13 */
 	{ XT_REG_IDX_AR14, 0x44, 32 },		/* A14 */
 	{ XT_REG_IDX_AR15, 0x48, 32 },		/* A15 */
+#if 0	// TODO: how to handle this...
 	{ XT_REG_IDX_AR16, -1, 32 },		/* A16 */ /* A16-A63 aren't in the stack frame because they've been flushed to the stack earlier */
 	{ XT_REG_IDX_AR17, -1, 32 },		/* A17 */
 	{ XT_REG_IDX_AR18, -1, 32 },		/* A18 */
@@ -219,6 +222,7 @@ static const struct stack_register_offset rtos_freertos_esp32_s2_stack_offsets[]
 	{ XT_REG_IDX_PS, 0x08, 32 },		/* ps */
 	{ XT_REG_IDX_THREADPTR, -1, 32 },		/* threadptr */
 	{ ESP32_S2_REG_IDX_GPIOOUT, -1, 32 },		/* gpio_out */
+#endif
 };
 
 static const struct stack_register_offset rtos_freertos_esp32_s3_stack_offsets[] = {
@@ -239,6 +243,7 @@ static const struct stack_register_offset rtos_freertos_esp32_s3_stack_offsets[]
 	{ XT_REG_IDX_AR13, 0x40, 32 },		/* A13 */
 	{ XT_REG_IDX_AR14, 0x44, 32 },		/* A14 */
 	{ XT_REG_IDX_AR15, 0x48, 32 },		/* A15 */
+#if 0	// TODO: how to handle this...
 	{ XT_REG_IDX_AR16, -1, 32 },		/* A16 */ /* A16-A63 aren't in the stack frame because they've been flushed to the stack earlier */
 	{ XT_REG_IDX_AR17, -1, 32 },		/* A17 */
 	{ XT_REG_IDX_AR18, -1, 32 },		/* A18 */
@@ -350,6 +355,7 @@ static const struct stack_register_offset rtos_freertos_esp32_s3_stack_offsets[]
 	{ ESP32_S3_REG_IDX_Q5, -1, 128 },		/* q5 */
 	{ ESP32_S3_REG_IDX_Q6, -1, 128 },		/* q6 */
 	{ ESP32_S3_REG_IDX_Q7, -1, 128 },		/* q7 */
+#endif
 };
 
 //WARNING: There's some deeper magic going on when reading this. Please
@@ -369,6 +375,7 @@ static const struct stack_register_offset rtos_freertos_esp32_voluntary_stack_of
 	{ XT_REG_IDX_AR9, 0x44, 32 },		/* A9 */
 	{ XT_REG_IDX_AR10, 0x48, 32 },		/* A10 */
 	{ XT_REG_IDX_AR11, 0x4c, 32 },		/* A11 */
+#if 0	// TODO: how to handle this...
 	{ XT_REG_IDX_AR12, -1, 32 },		/* A12 */ /* A12-A63 aren't in the stack frame because they've been flushed to the stack earlier or not relevant*/
 	{ XT_REG_IDX_AR13, -1, 32 },		/* A13 */
 	{ XT_REG_IDX_AR14, -1, 32 },		/* A14 */
@@ -461,6 +468,7 @@ static const struct stack_register_offset rtos_freertos_esp32_voluntary_stack_of
 	{ XT_REG_IDX_F15, -1, 32 },		/* f15 */
 	{ XT_REG_IDX_FCR, -1, 32 },		/* fcr */
 	{ XT_REG_IDX_FSR, -1, 32 },		/* fsr */
+#endif
 };
 
 
@@ -478,6 +486,7 @@ static const struct stack_register_offset rtos_freertos_esp32_s2_voluntary_stack
 	{ XT_REG_IDX_AR9, 0x44, 32 },		/* A9 */
 	{ XT_REG_IDX_AR10, 0x48, 32 },		/* A10 */
 	{ XT_REG_IDX_AR11, 0x4c, 32 },		/* A11 */
+#if 0	// TODO: how to handle this...
 	{ XT_REG_IDX_AR12, -1, 32 },		/* A12 */ /* A12-A63 aren't in the stack frame because they've been flushed to the stack earlier or not relevant*/
 	{ XT_REG_IDX_AR13, -1, 32 },		/* A13 */
 	{ XT_REG_IDX_AR14, -1, 32 },		/* A14 */
@@ -538,6 +547,7 @@ static const struct stack_register_offset rtos_freertos_esp32_s2_voluntary_stack
 	{ XT_REG_IDX_PS, 0x18, 32 },		/* ps */
 	{ XT_REG_IDX_THREADPTR, -1, 32 },		/* threadptr */
 	{ ESP32_S2_REG_IDX_GPIOOUT, -1, 32 },		/* gpio_out */
+#endif
 };
 
 static const struct stack_register_offset rtos_freertos_esp32_s3_voluntary_stack_offsets[] = {
@@ -554,6 +564,7 @@ static const struct stack_register_offset rtos_freertos_esp32_s3_voluntary_stack
 	{ XT_REG_IDX_AR9, 0x44, 32 },		/* A9 */
 	{ XT_REG_IDX_AR10, 0x48, 32 },		/* A10 */
 	{ XT_REG_IDX_AR11, 0x4c, 32 },		/* A11 */
+#if 0	// TODO: how to handle this...
 	{ XT_REG_IDX_AR12, -1, 32 },		/* A12 */ /* A12-A63 aren't in the stack frame because they've been flushed to the stack earlier or not relevant*/
 	{ XT_REG_IDX_AR13, -1, 32 },		/* A13 */
 	{ XT_REG_IDX_AR14, -1, 32 },		/* A14 */
@@ -669,6 +680,7 @@ static const struct stack_register_offset rtos_freertos_esp32_s3_voluntary_stack
 	{ ESP32_S3_REG_IDX_Q5, -1, 128 },		/* q5 */
 	{ ESP32_S3_REG_IDX_Q6, -1, 128 },		/* q6 */
 	{ ESP32_S3_REG_IDX_Q7, -1, 128 },		/* q7 */
+#endif
 };
 
 const struct rtos_register_stacking rtos_freertos_esp32_stacking = {

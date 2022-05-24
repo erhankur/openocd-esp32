@@ -106,12 +106,11 @@ int esp_xtensa_handle_target_event(struct target *target, enum target_event even
 
 int esp_xtensa_init_arch_info(struct target *target,
 	struct esp_xtensa_common *esp_xtensa,
-	const struct xtensa_config *xtensa_cfg,
 	struct xtensa_debug_module_config *dm_cfg,
 	const struct esp_flash_breakpoint_ops *flash_brps_ops,
 	const struct esp_semihost_ops *semihost_ops)
 {
-	int ret = xtensa_init_arch_info(target, &esp_xtensa->xtensa, xtensa_cfg, dm_cfg);
+	int ret = xtensa_init_arch_info(target, &esp_xtensa->xtensa, dm_cfg);
 	if (ret != ERROR_OK)
 		return ret;
 	ret = esp_common_init(&esp_xtensa->esp, flash_brps_ops, &xtensa_algo_hw);
