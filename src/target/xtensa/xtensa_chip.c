@@ -144,7 +144,7 @@ void xtensa_chip_queue_tdi_idle(struct target *target)
 	jtag_add_plain_ir_scan(1, t, NULL, TAP_IRPAUSE);
 }
 
-static int xtensa_chip_virt2phys(struct target *target,
+int xtensa_chip_virt2phys(struct target *target,
 	target_addr_t virtual, target_addr_t *physical)
 {
 	*physical = virtual;

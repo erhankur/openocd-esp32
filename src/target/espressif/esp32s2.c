@@ -29,6 +29,7 @@
 #include "esp32s2.h"
 #include "esp32_apptrace.h"
 #include "esp_xtensa.h"
+#include <target/xtensa/xtensa_chip.h>
 
 /* Overall memory map
  * TODO: read memory configuration from target registers */
@@ -398,11 +399,6 @@ static int esp32s2_disable_wdts(struct target *target)
 	return ERROR_OK;
 }
 
-static int esp32s2_arch_state(struct target *target)
-{
-	return ERROR_OK;
-}
-
 static int esp32s2_on_halt(struct target *target)
 {
 	return esp32s2_disable_wdts(target);
@@ -436,13 +432,6 @@ static int esp32s2_poll(struct target *target)
 	}
 
 	return ret;
-}
-
-static int esp32s2_virt2phys(struct target *target,
-	target_addr_t virtual, target_addr_t *physical)
-{
-	*physical = virtual;
-	return ERROR_OK;
 }
 
 static int esp32s2_handle_target_event(struct target *target, enum target_event event, void *priv)
@@ -548,10 +537,8 @@ extern const struct command_registration semihosting_common_handlers[];
 
 static const struct command_registration esp32s2_command_handlers[] = {
 	{
-		.name = "xtensa",
 		.mode = COMMAND_ANY,
 		.help = "Xtensa commands group",
-		.usage = "",
 		.chain = xtensa_command_handlers,
 	},
 	{
@@ -576,7 +563,7 @@ struct target_type esp32s2_target = {
 	.name = "esp32s2",
 
 	.poll = esp32s2_poll,
-	.arch_state = esp32s2_arch_state,
+	.arch_state = xtensa_chip_arch_state,
 
 	.halt = xtensa_halt,
 	.resume = xtensa_resume,
@@ -586,7 +573,7 @@ struct target_type esp32s2_target = {
 	.deassert_reset = esp32s2_deassert_reset,
 	.soft_reset_halt = esp32s2_soft_reset_halt,
 
-	.virt2phys = esp32s2_virt2phys,
+	.virt2phys = xtensa_chip_virt2phys,
 	.mmu = xtensa_mmu_is_enabled,
 	.read_memory = xtensa_read_memory,
 	.write_memory = xtensa_write_memory,

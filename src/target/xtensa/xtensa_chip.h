@@ -43,6 +43,8 @@ static inline struct xtensa_chip_common *target_to_xtensa_chip(struct target *ta
 
 int xtensa_chip_init_arch_info(struct target *target, void *arch_info, 
 		struct xtensa_debug_module_config *dm_cfg);
+int xtensa_chip_virt2phys(struct target *target,
+	target_addr_t virtual, target_addr_t *physical);
 int xtensa_chip_target_init(struct command_context *cmd_ctx, struct target *target);
 int xtensa_chip_arch_state(struct target *target);
 void xtensa_chip_queue_tdi_idle(struct target *target);

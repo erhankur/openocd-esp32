@@ -716,8 +716,8 @@ static int xtensa_write_dirty_registers(struct target *target)
 						LOG_WARNING(
 							"Warning: Both A%d [0x%08x] as well as its underlying physical register "
 							"(AR%d) [0x%08x] are dirty and differ in value",
-							i-XT_REG_IDX_A0, *(uint32_t *)reg_list[i].value,
-							j-XT_REG_IDX_AR0, *(uint32_t *)reg_list[j].value);
+							i-XT_REG_IDX_A0, buf_get_u32(reg_list[i].value, 0, 32),
+							j-XT_REG_IDX_AR0, buf_get_u32(reg_list[j].value, 0, 32));
 					}
 				}
 			}
