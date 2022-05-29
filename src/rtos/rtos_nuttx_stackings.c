@@ -93,7 +93,7 @@ static const struct stack_register_offset nuttx_stack_offsets_esp32[] = {
 
 	/* A16-A63 aren't in the stack frame because they've been flushed to the stack earlier */
 
-#if 0	// TODO: how to handle this...
+#if 0	/* TODO: how to handle this... */
 	{ XT_REG_IDX_AR16, -1, 32 },		/* A16 */
 	{ XT_REG_IDX_AR17, -1, 32 },		/* A17 */
 	{ XT_REG_IDX_AR18, -1, 32 },		/* A18 */

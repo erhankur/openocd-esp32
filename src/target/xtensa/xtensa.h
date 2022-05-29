@@ -36,17 +36,17 @@
  */
 
 /* Big-endian vs. little-endian detection */
-#define isbe(X)		((X)->core_config->bigendian)
+#define isbe(X)         ((X)->core_config->bigendian)
 
 /* 24-bit break; BE version field-swapped then byte-swapped for use in memory R/W fns */
-#define XT_INS_BREAK_LE(S,T) (0x004000 | (((S)&0xF)<<8)  | (((T)&0xF)<<4))
-#define XT_INS_BREAK_BE(S,T) (0x000400 | (((S)&0xF)<<12) | ((T)&0xF))
-#define XT_INS_BREAK(X,S,T)	(isbe(X) ? XT_INS_BREAK_BE(S,T) : XT_INS_BREAK_LE(S,T))
+#define XT_INS_BREAK_LE(S, T) (0x004000 | (((S) & 0xF) << 8) | (((T) & 0xF) << 4))
+#define XT_INS_BREAK_BE(S, T) (0x000400 | (((S) & 0xF) << 12) | ((T) & 0xF))
+#define XT_INS_BREAK(X, S, T)     (isbe(X) ? XT_INS_BREAK_BE(S, T) : XT_INS_BREAK_LE(S, T))
 
 /* 16-bit break; BE version field-swapped then byte-swapped for use in memory R/W fns */
-#define XT_INS_BREAKN_LE(IMM4) (0xF02D | (((IMM4)&0xF)<<8))
-#define XT_INS_BREAKN_BE(IMM4) (0x0FD2 | (((IMM4)&0xF)<<12))
-#define XT_INS_BREAKN(X,IMM4) (isbe(X) ? XT_INS_BREAKN_BE(IMM4) : XT_INS_BREAKN_LE(IMM4))
+#define XT_INS_BREAKN_LE(IMM4) (0xF02D | (((IMM4) & 0xF) << 8))
+#define XT_INS_BREAKN_BE(IMM4) (0x0FD2 | (((IMM4) & 0xF) << 12))
+#define XT_INS_BREAKN(X, IMM4) (isbe(X) ? XT_INS_BREAKN_BE(IMM4) : XT_INS_BREAKN_LE(IMM4))
 
 #define XT_ISNS_SZ_MAX                  3
 #define XT_LOCAL_MEM_REGIONS_NUM_MAX    8
