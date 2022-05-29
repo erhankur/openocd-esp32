@@ -134,7 +134,6 @@ struct xtensa_debug_config {
 	uint8_t ibreaks_num;
 	uint8_t dbreaks_num;
 	uint8_t perfcount_num;
-	uint32_t tracemem_bytes;
 };
 
 struct xtensa_tracing_config {

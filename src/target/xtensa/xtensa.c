@@ -3394,12 +3394,18 @@ COMMAND_HELPER(xtensa_cmd_xtopt_do, struct xtensa *xtensa)
 		}
 		xtensa->core_config->debug.dbreaks_num = opt_val;
 	} else if (strcasecmp(opt_name, "tracemem") == 0) {
-		if (!xtensa_cmd_xtopt_legal_val("trace", opt_val, 0, 256*1024)) {
+		if (!xtensa_cmd_xtopt_legal_val("tracemem", opt_val, 0, 256*1024)) {
 			return ERROR_COMMAND_ARGUMENT_INVALID;
 		}
-		xtensa->core_config->debug.tracemem_bytes = opt_val;
+		xtensa->core_config->trace.mem_sz = opt_val;
+		xtensa->core_config->trace.enabled = (opt_val > 0);
+	} else if (strcasecmp(opt_name, "tracememrev") == 0) {
+		if (!xtensa_cmd_xtopt_legal_val("tracememrev", opt_val, 0, 1)) {
+			return ERROR_COMMAND_ARGUMENT_INVALID;
+		}
+		xtensa->core_config->trace.reversed_mem_access = opt_val;
 	} else if (strcasecmp(opt_name, "perfcount") == 0) {
-		if (!xtensa_cmd_xtopt_legal_val("trace", opt_val, 0, 8)) {
+		if (!xtensa_cmd_xtopt_legal_val("perfcount", opt_val, 0, 8)) {
 			return ERROR_COMMAND_ARGUMENT_INVALID;
 		}
 		xtensa->core_config->debug.perfcount_num = opt_val;
