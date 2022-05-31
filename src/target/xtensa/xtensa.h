@@ -189,7 +189,7 @@ struct xtensa_sw_breakpoint {
 	uint8_t insn_sz;	/* 2 or 3 bytes */
 };
 
-#define XTENSA_COMMON_MAGIC 0x54E4E555
+#define XTENSA_COMMON_MAGIC 0x54E4E555U
 
 /**
  * Represents a generic Xtensa core.

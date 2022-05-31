@@ -813,7 +813,7 @@ int xtensa_examine(struct target *target)
 	struct xtensa *xtensa = target_to_xtensa(target);
 	unsigned int cmd = PWRCTL_DEBUGWAKEUP | PWRCTL_MEMWAKEUP | PWRCTL_COREWAKEUP;
 
-	LOG_DEBUG("%s coreid = %d", __func__, target->coreid);
+	LOG_DEBUG("coreid = %d", target->coreid);
 
 	if (xtensa->core_config->core_type == XT_UNDEF) {
 		LOG_ERROR("XTensa core not configured; is xtensa-core-openocd.cfg missing?");
@@ -1736,10 +1736,6 @@ int xtensa_read_memory(struct target *target, target_addr_t address, uint32_t si
 	uint8_t *albuff;
 	bool bswap = xtensa->core_config->bigendian;
 
-#if 0
-	LOG_INFO("%s: %s: reading %d bytes from addr %08X", target_name(target), __func__, size * count, address);
-	LOG_INFO("Converted to aligned addresses: read from %08X to %08X", addrstart_al, addrend_al);
-#endif
 	if (target->state != TARGET_HALTED) {
 		LOG_TARGET_WARNING(target, "target not halted");
 		return ERROR_TARGET_NOT_HALTED;
@@ -1758,8 +1754,7 @@ int xtensa_read_memory(struct target *target, target_addr_t address, uint32_t si
 	} else {
 		albuff = malloc(addrend_al - addrstart_al);
 		if (!albuff) {
-			LOG_ERROR("%s: Out of memory allocating %" TARGET_PRIdADDR " bytes!",
-				__func__,
+			LOG_TARGET_ERROR(target, "Out of memory allocating %" TARGET_PRIdADDR " bytes!",
 				addrend_al - addrstart_al);
 			return ERROR_TARGET_RESOURCE_NOT_AVAILABLE;
 		}
@@ -1859,10 +1854,6 @@ int xtensa_write_memory(struct target *target,
 		}
 	}
 
-#if 0
-	LOG_INFO("%s: %s: writing %d bytes to addr %08X", target_name(target), __func__, size * count, address);
-	LOG_INFO("al start %x al end %x", addrstart_al, addrend_al);
-#endif
 	if (size == 0 || count == 0 || !buffer)
 		return ERROR_COMMAND_SYNTAX_ERROR;
 
@@ -1880,8 +1871,7 @@ int xtensa_write_memory(struct target *target,
 		albuff = malloc(addrend_al - addrstart_al);
 	}
 	if (!albuff) {
-		LOG_ERROR("%s: Out of memory allocating %" TARGET_PRIdADDR " bytes!",
-			__func__,
+		LOG_TARGET_ERROR(target, "Out of memory allocating %" TARGET_PRIdADDR " bytes!",
 			addrend_al - addrstart_al);
 		return ERROR_TARGET_RESOURCE_NOT_AVAILABLE;
 	}
