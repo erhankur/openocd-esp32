@@ -1,5 +1,8 @@
 /***************************************************************************
  *   Generic Xtensa target                                                 *
+ *   Copyright (C) 2020-2022 Cadence Design Systems, Inc.                  *
+ *   Author: Ian Thompson <ianst@cadence.com>                              *
+ *                                                                         *
  *   Copyright (C) 2019 Espressif Systems Ltd.                             *
  *   Author: Alexey Gerenkov <alexey@espressif.com>                        *
  *                                                                         *
@@ -23,6 +26,7 @@
 #include "assert.h"
 #include <target/target.h>
 #include <target/breakpoints.h>
+#include "xtensa_chip.h"
 #include "xtensa_regs.h"
 #include "xtensa_debug_module.h"
 
@@ -30,29 +34,21 @@
  * @file
  * Holds the interface to Xtensa cores.
  */
-#define _XT_INS_FORMAT_RRR(OPCODE, ST, R) ((OPCODE)	    \
-		| (((ST) & 0xFF) << 4) \
-		| (((R) & 0x0F) << 12))
 
-#define _XT_INS_FORMAT_RRRN(OPCODE, S, T, IMM4) ((OPCODE)	      \
-		| (((T) & 0x0F) << 4)	\
-		| (((S) & 0x0F) << 8)	\
-		| (((IMM4) & 0x0F) << 12))
+/* Big-endian vs. little-endian detection */
+#define isbe(X)         ((X)->core_config->bigendian)
 
-/* 32-bit break */
-#define XT_INS_BREAK(IMM1, IMM2)  _XT_INS_FORMAT_RRR(0x000000, \
-		(((IMM1) & 0x0F) << 4) | ((IMM2) & 0x0F), 0x4)
-/* 16-bit break */
-#define XT_INS_BREAKN(IMM4)  _XT_INS_FORMAT_RRRN(0x00000D, IMM4, 0x2, 0xF)
+/* 24-bit break; BE version field-swapped then byte-swapped for use in memory R/W fns */
+#define XT_INS_BREAK_LE(S, T) (0x004000 | (((S) & 0xF) << 8) | (((T) & 0xF) << 4))
+#define XT_INS_BREAK_BE(S, T) (0x000400 | (((S) & 0xF) << 12) | ((T) & 0xF))
+#define XT_INS_BREAK(X, S, T)     (isbe(X) ? XT_INS_BREAK_BE(S, T) : XT_INS_BREAK_LE(S, T))
+
+/* 16-bit break; BE version field-swapped then byte-swapped for use in memory R/W fns */
+#define XT_INS_BREAKN_LE(IMM4) (0xF02D | (((IMM4) & 0xF) << 8))
+#define XT_INS_BREAKN_BE(IMM4) (0x0FD2 | (((IMM4) & 0xF) << 12))
+#define XT_INS_BREAKN(X, IMM4) (isbe(X) ? XT_INS_BREAKN_BE(IMM4) : XT_INS_BREAKN_LE(IMM4))
 
 #define XT_ISNS_SZ_MAX                  3
-
-#define XT_PS_RING(_v_)                 ((uint32_t)((_v_) & 0x3) << 6)
-#define XT_PS_RING_MSK                  (0x3 << 6)
-#define XT_PS_RING_GET(_v_)             (((_v_) >> 6) & 0x3)
-#define XT_PS_CALLINC_MSK               (0x3 << 16)
-#define XT_PS_OWB_MSK                   (0xF << 8)
-
 #define XT_LOCAL_MEM_REGIONS_NUM_MAX    8
 
 #define XT_AREGS_NUM_MAX                64
@@ -62,24 +58,43 @@
 #define XT_MEM_ACCESS_READ              0x1
 #define XT_MEM_ACCESS_WRITE             0x2
 
-enum xtensa_mem_err_detect {
-	XT_MEM_ERR_DETECT_NONE,
-	XT_MEM_ERR_DETECT_PARITY,
-	XT_MEM_ERR_DETECT_ECC,
+enum xtensa_qerr_e {
+	XT_QERR_INTERNAL = 0,
+	XT_QERR_FAIL,
+	XT_QERR_INVAL,
+	XT_QERR_MEM,
+	XT_QERR_NUM,
+};
+
+/* An and ARn registers potentially used as scratch regs */
+enum xtensa_ar_scratch_set_e {
+	XT_AR_SCRATCH_A3 = 0,
+	XT_AR_SCRATCH_AR3,
+	XT_AR_SCRATCH_A4,
+	XT_AR_SCRATCH_AR4,
+	XT_AR_SCRATCH_NUM
+};
+
+struct xtensa_keyval_info_s {
+	char *chrval;
+	int intval;
+};
+
+enum xtensa_type {
+	XT_UNDEF = 0,
+	XT_LX,
 };
 
 struct xtensa_cache_config {
 	uint8_t way_count;
-	uint8_t line_size;
-	uint16_t size;
-	bool writeback;
-	enum xtensa_mem_err_detect mem_err_check;
+	uint32_t line_size;
+	uint32_t size;
+	int writeback;
 };
 
 struct xtensa_local_mem_region_config {
 	target_addr_t base;
 	uint32_t size;
-	enum xtensa_mem_err_detect mem_err_check;
 	int access;
 };
 
@@ -92,13 +107,14 @@ struct xtensa_mmu_config {
 	bool enabled;
 	uint8_t itlb_entries_count;
 	uint8_t dtlb_entries_count;
-	bool ivarway56;
-	bool dvarway56;
 };
 
-struct xtensa_exception_config {
+struct xtensa_mpu_config {
 	bool enabled;
-	uint8_t depc_num;
+	uint8_t nfgseg;
+	uint32_t minsegsize;
+	bool lockable;
+	bool execonly;
 };
 
 struct xtensa_irq_config {
@@ -108,8 +124,8 @@ struct xtensa_irq_config {
 
 struct xtensa_high_prio_irq_config {
 	bool enabled;
+	uint8_t level_num;
 	uint8_t excm_level;
-	uint8_t nmi_num;
 };
 
 struct xtensa_debug_config {
@@ -117,7 +133,7 @@ struct xtensa_debug_config {
 	uint8_t irq_level;
 	uint8_t ibreaks_num;
 	uint8_t dbreaks_num;
-	uint8_t icount_sz;
+	uint8_t perfcount_num;
 };
 
 struct xtensa_tracing_config {
@@ -126,48 +142,27 @@ struct xtensa_tracing_config {
 	bool reversed_mem_access;
 };
 
-struct xtensa_timer_irq_config {
-	bool enabled;
-	uint8_t comp_num;
-};
-
 struct xtensa_config {
-	bool density;
+	enum xtensa_type core_type;
+	bool bigendian;
 	uint8_t aregs_num;
 	bool windowed;
 	bool coproc;
-	bool fp_coproc;
-	bool loop;
-	uint8_t miscregs_num;
-	bool threadptr;
-	bool boolean;
-	bool cond_store;
-	bool ext_l32r;
-	bool mac16;
-	bool reloc_vec;
-	bool proc_id;
-	bool mem_err_check;
-	uint16_t user_regs_num;
-	const struct xtensa_user_reg_desc *user_regs;
-	int (*fetch_user_regs)(struct target *target);
-	int (*queue_write_dirty_user_regs)(struct target *target);
+	bool exceptions;
+	struct xtensa_irq_config irq;
+	struct xtensa_high_prio_irq_config high_irq;
+	struct xtensa_mmu_config mmu;
+	struct xtensa_mpu_config mpu;
+	struct xtensa_debug_config debug;
+	struct xtensa_tracing_config trace;
 	struct xtensa_cache_config icache;
 	struct xtensa_cache_config dcache;
 	struct xtensa_local_mem_config irom;
 	struct xtensa_local_mem_config iram;
 	struct xtensa_local_mem_config drom;
 	struct xtensa_local_mem_config dram;
-	struct xtensa_local_mem_config uram;
-	struct xtensa_local_mem_config xlmi;
-	struct xtensa_mmu_config mmu;
-	struct xtensa_exception_config exc;
-	struct xtensa_irq_config irq;
-	struct xtensa_high_prio_irq_config high_irq;
-	struct xtensa_timer_irq_config tim_irq;
-	struct xtensa_debug_config debug;
-	struct xtensa_tracing_config trace;
-	unsigned int gdb_general_regs_num;
-	const unsigned int *gdb_regs_mapping;
+	struct xtensa_local_mem_config sram;
+	struct xtensa_local_mem_config srom;
 };
 
 typedef uint32_t xtensa_insn_t;
@@ -194,20 +189,28 @@ struct xtensa_sw_breakpoint {
 	uint8_t insn_sz;	/* 2 or 3 bytes */
 };
 
-#define XTENSA_COMMON_MAGIC 0x54E4E555
+#define XTENSA_COMMON_MAGIC 0x54E4E555U
 
 /**
  * Represents a generic Xtensa core.
  */
 struct xtensa {
 	unsigned int common_magic;
-	const struct xtensa_config *core_config;
+	struct xtensa_chip_common *xtensa_chip;
+	struct xtensa_config *core_config;
 	struct xtensa_debug_module dbg_mod;
 	struct reg_cache *core_cache;
-	unsigned int regs_num;
+	uint32_t total_regs_num;
+	uint32_t core_regs_num;
+	bool regmap_contiguous;
+	unsigned int genpkt_regs_num;
+	struct xtensa_reg_desc **contiguous_regs_desc;
+	struct reg **contiguous_regs_list;
 	/* An array of pointers to buffers to backup registers' values while algo is run on target.
 	 * Size is 'regs_num'. */
 	void **algo_context_backup;
+	uint32_t eps_dbglevel_idx;
+	uint32_t dbregs_num;
 	struct target *target;
 	bool reset_asserted;
 	enum xtensa_stepping_isr_mode stepping_isr_mode;
@@ -218,11 +221,18 @@ struct xtensa {
 	bool permissive_mode;	/* bypass memory checks */
 	bool suppress_dsr_errors;
 	uint32_t smp_break;
+	uint32_t spill_loc;
+	uint32_t spill_bytes;
+	uint8_t *spill_buf;
+	int8_t probe_lsddr32p;
 	/* Sometimes debug module's 'powered' bit is cleared after reset, but get set after some
 	 * time.This is the number of polling periods after which core is considered to be powered
 	 * off (marked as unexamined) if the bit retains to be cleared (e.g. if core is disabled by
 	 * SW running on target).*/
 	uint8_t come_online_probes_num;
+	bool proc_syscall;
+	bool halt_request;
+	struct xtensa_keyval_info_s scratch_ars[XT_AR_SCRATCH_NUM];
 	bool regs_fetched;	/* true after first register fetch completed successfully */
 };
 
@@ -236,10 +246,22 @@ static inline struct xtensa *target_to_xtensa(struct target *target)
 
 int xtensa_init_arch_info(struct target *target,
 	struct xtensa *xtensa,
-	const struct xtensa_config *cfg,
 	const struct xtensa_debug_module_config *dm_cfg);
 int xtensa_target_init(struct command_context *cmd_ctx, struct target *target);
 void xtensa_target_deinit(struct target *target);
+
+static inline void xtensa_stepping_isr_mode_set(struct target *target,
+	enum xtensa_stepping_isr_mode mode)
+{
+	struct xtensa *xtensa = target_to_xtensa(target);
+	xtensa->stepping_isr_mode = mode;
+}
+
+static inline enum xtensa_stepping_isr_mode xtensa_stepping_isr_mode_get(struct target *target)
+{
+	struct xtensa *xtensa = target_to_xtensa(target);
+	return xtensa->stepping_isr_mode;
+}
 
 static inline bool xtensa_addr_in_mem(const struct xtensa_local_mem_config *mem, uint32_t addr)
 {
@@ -259,7 +281,7 @@ static inline bool xtensa_data_addr_valid(struct target *target, uint32_t addr)
 		return true;
 	if (xtensa_addr_in_mem(&xtensa->core_config->dram, addr))
 		return true;
-	if (xtensa_addr_in_mem(&xtensa->core_config->uram, addr))
+	if (xtensa_addr_in_mem(&xtensa->core_config->sram, addr))
 		return true;
 	return false;
 }
@@ -288,6 +310,12 @@ static inline int xtensa_queue_dbg_reg_write(struct xtensa *xtensa, unsigned int
 	return dm->dbg_ops->queue_reg_write(dm, reg, data);
 }
 
+static inline int xtensa_core_status_clear(struct target *target, uint32_t bits)
+{
+	struct xtensa *xtensa = target_to_xtensa(target);
+	return xtensa_dm_core_status_clear(&xtensa->dbg_mod, bits);
+}
+
 int xtensa_core_status_check(struct target *target);
 
 int xtensa_examine(struct target *target);
@@ -298,11 +326,15 @@ int xtensa_smpbreak_write(struct xtensa *xtensa, uint32_t set);
 int xtensa_smpbreak_read(struct xtensa *xtensa, uint32_t *val);
 xtensa_reg_val_t xtensa_reg_get(struct target *target, enum xtensa_reg_id reg_id);
 void xtensa_reg_set(struct target *target, enum xtensa_reg_id reg_id, xtensa_reg_val_t value);
+void xtensa_reg_set_deep_relgen(struct target *target, enum xtensa_reg_id a_idx, xtensa_reg_val_t value);
 int xtensa_fetch_all_regs(struct target *target);
 int xtensa_get_gdb_reg_list(struct target *target,
 	struct reg **reg_list[],
 	int *reg_list_size,
 	enum target_register_class reg_class);
+uint32_t xtensa_cause_get(struct target *target);
+void xtensa_cause_clear(struct target *target);
+void xtensa_cause_reset(struct target *target);
 int xtensa_poll(struct target *target);
 void xtensa_on_poll(struct target *target);
 int xtensa_halt(struct target *target);
@@ -331,6 +363,7 @@ int xtensa_write_buffer(struct target *target, target_addr_t address, uint32_t c
 int xtensa_checksum_memory(struct target *target, target_addr_t address, uint32_t count, uint32_t *checksum);
 int xtensa_assert_reset(struct target *target);
 int xtensa_deassert_reset(struct target *target);
+int xtensa_soft_reset_halt(struct target *target);
 int xtensa_breakpoint_add(struct target *target, struct breakpoint *breakpoint);
 int xtensa_breakpoint_remove(struct target *target, struct breakpoint *breakpoint);
 int xtensa_watchpoint_add(struct target *target, struct watchpoint *watchpoint);
@@ -350,16 +383,9 @@ int xtensa_run_algorithm(struct target *target,
 	int num_reg_params, struct reg_param *reg_params,
 	target_addr_t entry_point, target_addr_t exit_point,
 	int timeout_ms, void *arch_info);
-int xtensa_handle_target_event(struct target *target,
-	enum target_event event,
-	void *priv);
+int xtensa_handle_target_event(struct target *target, enum target_event event, void *priv);
 void xtensa_set_permissive_mode(struct target *target, bool state);
-int xtensa_fetch_user_regs_u32(struct target *target);
-int xtensa_queue_write_dirty_user_regs_u32(struct target *target);
-const char *xtensa_get_gdb_arch(struct target *target);
-
-extern const struct reg_arch_type xtensa_user_reg_u32_type;
-extern const struct reg_arch_type xtensa_user_reg_u128_type;
+int xtensa_gdb_query_custom(struct target *target, const char *packet, char **response_p);
 
 COMMAND_HELPER(xtensa_cmd_permissive_mode_do, struct xtensa *xtensa);
 COMMAND_HELPER(xtensa_cmd_mask_interrupts_do, struct xtensa *xtensa);
