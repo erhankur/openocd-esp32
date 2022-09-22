@@ -389,11 +389,14 @@ static int nuttx_getreg_current_thread(struct rtos *rtos,
 		return ERROR_FAIL;
 	}
 
+	bool is_xtensa = strncmp(target_get_gdb_arch(rtos->target), "xtensa", 6) == 0;
 	for (int i = 0; i < *num_regs; i++) {
-		(*reg_list)[i].number = gdb_reg_list[i]->number;
+		if (is_xtensa)
+			(*reg_list)[i].number = i;
+		else
+			(*reg_list)[i].number = gdb_reg_list[i]->number;
 		(*reg_list)[i].size = gdb_reg_list[i]->size;
-		memcpy((*reg_list)[i].value, gdb_reg_list[i]->value,
-			((*reg_list)[i].size + 7) / 8);
+		memcpy((*reg_list)[i].value, gdb_reg_list[i]->value, ((*reg_list)[i].size + 7) / 8);
 	}
 
 	free(gdb_reg_list);
