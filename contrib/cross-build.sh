@@ -105,6 +105,7 @@ if [ -d $LIBUSB1_SRC ] ; then
   $LIBUSB1_CONFIG
   make -j $MAKE_JOBS
   make install DESTDIR=$SYSROOT
+  ls -la ${SYSROOT}${PREFIX}/lib
 fi
 
 # hidapi build & install into sysroot
@@ -116,6 +117,7 @@ if [ -d $HIDAPI_SRC ] ; then
     $HIDAPI_CONFIG
   make -j $MAKE_JOBS
   make install DESTDIR=$SYSROOT
+  ls -la ${SYSROOT}${PREFIX}/lib
 fi
 
 # libftdi build & install into sysroot
@@ -131,6 +133,7 @@ if [ -d $LIBFTDI_SRC ] ; then
     -DPKG_CONFIG_EXECUTABLE=`which pkg-config` \
     $LIBFTDI_SRC
   make install DESTDIR=$SYSROOT
+  ls -la ${SYSROOT}${PREFIX}/lib
 fi
 
 # capstone build & install into sysroot
