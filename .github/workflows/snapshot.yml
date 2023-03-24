@@ -8,7 +8,7 @@ name: OpenOCD Snapshot
 
 jobs:
   package:
-    runs-on: [ubuntu-18.04]
+    runs-on: [ubuntu-latest]
     env:
       DL_DIR: ../downloads
       BUILD_DIR: ../build
@@ -68,7 +68,7 @@ jobs:
         env:
           MAKE_JOBS: 2
           HOST: i686-w64-mingw32
-          LIBUSB1_CONFIG: --enable-shared=no --enable-static=yes
+          LIBUSB1_CONFIG: --enable-shared --disable-static
           HIDAPI_CONFIG: --enable-shared --disable-static --disable-testgui
           LIBFTDI_CONFIG: -DSTATICLIBS=OFF -DEXAMPLES=OFF -DFTDI_EEPROM=OFF
           CAPSTONE_CONFIG: "CAPSTONE_BUILD_CORE_ONLY=yes CAPSTONE_STATIC=yes CAPSTONE_SHARED=no"
@@ -90,7 +90,7 @@ jobs:
           # add missing dlls
           cd $HOST-root/usr
           cp `$HOST-gcc --print-file-name=libwinpthread-1.dll` ./bin/
-          cp `$HOST-gcc --print-file-name=libgcc_s_sjlj-1.dll` ./bin/
+          cp `$HOST-gcc --print-file-name=libgcc_s_dw2-1.dll` ./bin/
           # prepare the artifact
           ARTIFACT="openocd-${OPENOCD_TAG}-${HOST}.tar.gz"
           tar -czf $ARTIFACT *
