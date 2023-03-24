@@ -84,7 +84,7 @@ jobs:
           # set env and call cross-build.sh
           export OPENOCD_TAG=$OPENOCD_TAG
           export OPENOCD_SRC=$PWD
-          export OPENOCD_CONFIG="--disable-esp-compression"
+          export OPENOCD_CONFIG="--disable-esp-compression --enable-internal-libjaylink"
           mkdir -p $BUILD_DIR &&  cd $BUILD_DIR
           bash $OPENOCD_SRC/contrib/cross-build.sh $HOST
           # add missing dlls

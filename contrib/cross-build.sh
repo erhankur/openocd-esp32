@@ -132,6 +132,7 @@ if [ -d $LIBFTDI_SRC ] ; then
   cmake $LIBFTDI_CONFIG \
     -DLIBUSB_INCLUDE_DIR=${SYSROOT}${PREFIX}/include/libusb-1.0 \
     -DLIBUSB_LIBRARIES=${SYSROOT}${PREFIX}/lib/libusb-1.0.a \
+    -DCMAKE_TOOLCHAIN_FILE=$OPENOCD_SRC/contrib/toolchain-mingw32.cmake \
     -DCMAKE_INSTALL_PREFIX=${PREFIX} \
     -DPKG_CONFIG_EXECUTABLE=`which pkg-config` \
     $LIBFTDI_SRC
