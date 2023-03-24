@@ -163,8 +163,11 @@ if [ -d $ZLIB_SRC ] ; then
   mkdir -p $ZLIB_BUILD_DIR
   cd $ZLIB_BUILD_DIR
   cp -r $ZLIB_SRC/* .
-  INSTALLDIR=_build
-  make -f win32/Makefile.gcc BINARY_PATH=$SYSROOT/bin INCLUDE_PATH=$SYSROOT/include LIBRARY_PATH=$SYSROOT/lib SHARED_MODE=1 PREFIX=$HOST_TRIPLET- install
+  make -f win32/Makefile.gcc BINARY_PATH=$SYSROOT${PREFIX}/bin \
+    INCLUDE_PATH=${SYSROOT}${PREFIX}/include \
+    LIBRARY_PATH=${SYSROOT}${PREFIX}/lib \
+    SHARED_MODE=1 \
+    PREFIX=$HOST_TRIPLET- install
   ls -la ${SYSROOT}${PREFIX}/lib
 fi
 

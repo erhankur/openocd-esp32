@@ -25,7 +25,7 @@ jobs:
           LIBUSB1_VER: 1.0.26
         run: |
           mkdir -p $DL_DIR && cd $DL_DIR
-          wget "https://github.com/libusb/libusb/releases/download/v${LIBUSB1_VER}/libusb-${LIBUSB1_VER}.tar.bz2"
+          wget "https://github.com/libusb/libusb/releases/download/v${LIBUSB1_VER}/libusb-${LIBUSB1_VER}.tar.bz2" --no-check-certificate 
           tar -xjf libusb-${LIBUSB1_VER}.tar.bz2
           echo "LIBUSB1_SRC=$PWD/libusb-${LIBUSB1_VER}" >> $GITHUB_ENV
       - name: Prepare hidapi
@@ -33,7 +33,7 @@ jobs:
           HIDAPI_VER: 0.11.2
         run: |
           mkdir -p $DL_DIR && cd $DL_DIR
-          wget "https://github.com/libusb/hidapi/archive/hidapi-${HIDAPI_VER}.tar.gz"
+          wget "https://github.com/libusb/hidapi/archive/hidapi-${HIDAPI_VER}.tar.gz" --no-check-certificate 
           tar -xzf hidapi-${HIDAPI_VER}.tar.gz
           cd hidapi-hidapi-${HIDAPI_VER}
           ./bootstrap
@@ -53,7 +53,7 @@ jobs:
           mkdir -p $DL_DIR && cd $DL_DIR
           CAPSTONE_NAME=${CAPSTONE_VER}
           CAPSTONE_FOLDER=capstone-${CAPSTONE_VER}
-          wget "https://github.com/aquynh/capstone/archive/${CAPSTONE_VER}.tar.gz"
+          wget "https://github.com/aquynh/capstone/archive/${CAPSTONE_VER}.tar.gz" --no-check-certificate 
           tar -xzf ${CAPSTONE_VER}.tar.gz
           echo "CAPSTONE_SRC=$PWD/capstone-${CAPSTONE_VER}" >> $GITHUB_ENV
       - name: Prepare zlib
