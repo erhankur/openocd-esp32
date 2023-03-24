@@ -41,12 +41,14 @@ WORK_DIR=$PWD
 : ${HIDAPI_SRC:=/path/to/hidapi}
 : ${LIBFTDI_SRC:=/path/to/libftdi}
 : ${CAPSTONE_SRC:=/path/to/capstone}
+: ${ZLIB_SRC:=/path/to/zlib}
 
 OPENOCD_SRC=`readlink -m $OPENOCD_SRC`
 LIBUSB1_SRC=`readlink -m $LIBUSB1_SRC`
 HIDAPI_SRC=`readlink -m $HIDAPI_SRC`
 LIBFTDI_SRC=`readlink -m $LIBFTDI_SRC`
 CAPSTONE_SRC=`readlink -m $CAPSTONE_SRC`
+ZLIB_SRC=`readlink -m $ZLIB_SRC`
 
 HOST_TRIPLET=$1
 BUILD_DIR=$WORK_DIR/$HOST_TRIPLET-build
@@ -54,6 +56,7 @@ LIBUSB1_BUILD_DIR=$BUILD_DIR/libusb1
 HIDAPI_BUILD_DIR=$BUILD_DIR/hidapi
 LIBFTDI_BUILD_DIR=$BUILD_DIR/libftdi
 CAPSTONE_BUILD_DIR=$BUILD_DIR/capstone
+ZLIB_BUILD_DIR=$BUILD_DIR/zlib
 OPENOCD_BUILD_DIR=$BUILD_DIR/openocd
 
 ## Root of host file tree
@@ -155,6 +158,15 @@ libdir=${exec_prefix}/lib \
 includedir=${prefix}/include/capstone\n\n;' $CAPSTONE_PC_FILE
 fi
 
+# zlib build & install into sysroot
+if [ -d $ZLIB_SRC ] ; then
+  mkdir -p $ZLIB_BUILD_DIR
+  cd $ZLIB_BUILD_DIR
+  cp -r $ZLIB_SRC/* .
+  INSTALLDIR=_build
+  make -f win32/Makefile.gcc BINARY_PATH=$SYSROOT/bin INCLUDE_PATH=$SYSROOT/include LIBRARY_PATH=$SYSROOT/lib SHARED_MODE=1 PREFIX=$HOST_TRIPLET- install
+  ls -la ${SYSROOT}${PREFIX}/lib
+fi
 
 # OpenOCD build & install into sysroot
 mkdir -p $OPENOCD_BUILD_DIR
