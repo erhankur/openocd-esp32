@@ -1,0 +1,56 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+# Copyright (C) 2020 by Tarek BOUCHKATI <tarek.bouchkati@gmail.com>
+
+on: push
+
+name: OpenOCD Snapshot
+
+jobs:
+  package:
+    runs-on: [ubuntu-latest]
+    env:
+      DL_DIR: ../downloads
+      BUILD_DIR: ../build
+    steps:
+      - name: Install needed packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install autotools-dev autoconf automake libtool pkg-config cmake texinfo texlive g++-mingw-w64-i686
+      - name: Checkout Code
+        uses: actions/checkout@v1
+      - name: Build libusb, zlib and OpenOCD
+        env:
+          LIBUSB1_VER: 1.0.26
+          LIBUSB1_CONFIG: --enable-shared --disable-static
+          ZLIB_VER: 1.2.11
+          CONF_HOST: "i686-w64-mingw32"
+          OPENOCD_CONFIG: "--disable-doxygen-html --enable-internal-libjaylink --enable-remote-bitbang"
+        run: |
+          mkdir -p $DL_DIR && cd $DL_DIR
+          wget "https://github.com/libusb/libusb/releases/download/v${LIBUSB1_VER}/libusb-${LIBUSB1_VER}.tar.bz2"
+          tar -xjf libusb-${LIBUSB1_VER}.tar.bz2
+          pushd libusb-${LIBUSB1_VER}
+          ./configure --prefix=$PWD/dist --host=$CONF_HOST $LIBUSB1_CONFIG
+          make
+          make install-strip
+          export PKG_CONFIG_PATH=$PWD/dist/lib/pkgconfig
+          popd
+          wget https://zlib.net/fossils/zlib-${ZLIB_VER}.tar.gz
+          tar -xzf zlib-${ZLIB_VER}.tar.gz
+          pushd zlib-${ZLIB_VER}
+          mkdir _build
+          INSTALLDIR=_build
+          make -f win32/Makefile.gcc BINARY_PATH=$INSTALLDIR/bin INCLUDE_PATH=$INSTALLDIR/include LIBRARY_PATH=$INSTALLDIR/lib SHARED_MODE=1 PREFIX=${CONF_HOST}- install
+          export CPPFLAGS="-I$PWD/$INSTALLDIR/include"
+          export LDFLAGS="-L$PWD/$INSTALLDIR/lib"
+          export ZLIB_DIR=$PWD/$INSTALLDIR/bin
+          popd
+          cd ..
+          ls -la
+          cd openocd-esp32
+          ./bootstrap
+          ./configure --prefix=$PWD/dist --host=${CONF_HOST} $OPENOCD_CONFIG
+          make
+          make install-strip
+          ls -la $PWD/dist
