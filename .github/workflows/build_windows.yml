@@ -1,10 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-
-# Copyright (C) 2020 by Tarek BOUCHKATI <tarek.bouchkati@gmail.com>
-
 on: push
 
-name: OpenOCD Snapshot
+name: OpenOCD Windows Build
 
 jobs:
   package:
@@ -30,6 +27,7 @@ jobs:
           mkdir -p $DL_DIR && cd $DL_DIR
           wget "https://github.com/libusb/libusb/releases/download/v${LIBUSB1_VER}/libusb-${LIBUSB1_VER}.tar.bz2"
           tar -xjf libusb-${LIBUSB1_VER}.tar.bz2
+          echo "LIBUSB1_SRC=$PWD/libusb-${LIBUSB1_VER}" >> $GITHUB_ENV
           pushd libusb-${LIBUSB1_VER}
           ./configure --prefix=$PWD/dist --host=$CONF_HOST $LIBUSB1_CONFIG
           make
@@ -46,11 +44,15 @@ jobs:
           export LDFLAGS="-L$PWD/$INSTALLDIR/lib"
           export ZLIB_DIR=$PWD/$INSTALLDIR/bin
           popd
-          cd ..
-          ls -la
-          cd openocd-esp32
+          cd ../openocd-esp32
           ./bootstrap
           ./configure --prefix=$PWD/dist --host=${CONF_HOST} $OPENOCD_CONFIG
           make
           make install-strip
-          ls -la $PWD/dist
+          ls -la $PWD/dist/bin
+          ls -la $PWD/dist/share
+      - name: Package OpenOCD for windows
+        run: |
+          echo $PWD
+          ls -la
+          echo $LIBUSB1_SRC
