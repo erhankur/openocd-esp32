@@ -30,7 +30,7 @@ jobs:
           echo "LIBUSB1_SRC=$PWD/libusb-${LIBUSB1_VER}" >> $GITHUB_ENV
       - name: Prepare hidapi
         env:
-          HIDAPI_VER: 0.11.2
+          HIDAPI_VER: 0.13.1
         run: |
           mkdir -p $DL_DIR && cd $DL_DIR
           wget "https://github.com/libusb/hidapi/archive/hidapi-${HIDAPI_VER}.tar.gz" --no-check-certificate 
@@ -98,7 +98,7 @@ jobs:
           echo "IS_PRE_RELEASE=$IS_PRE_RELEASE" >> $GITHUB_ENV
           echo "ARTIFACT_PATH=$PWD/$ARTIFACT" >> $GITHUB_ENV
       - name: Publish OpenOCD packaged for windows
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}
       - name: Delete 'latest' Release
