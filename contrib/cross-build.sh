@@ -41,6 +41,7 @@ WORK_DIR=$PWD
 : ${HIDAPI_SRC:=/path/to/hidapi}
 : ${LIBFTDI_SRC:=/path/to/libftdi}
 : ${CAPSTONE_SRC:=/path/to/capstone}
+: ${LIBJAYLINK_SRC:=/path/to/libjaylink}
 : ${ZLIB_SRC:=/path/to/zlib}
 
 OPENOCD_SRC=`readlink -m $OPENOCD_SRC`
@@ -48,6 +49,7 @@ LIBUSB1_SRC=`readlink -m $LIBUSB1_SRC`
 HIDAPI_SRC=`readlink -m $HIDAPI_SRC`
 LIBFTDI_SRC=`readlink -m $LIBFTDI_SRC`
 CAPSTONE_SRC=`readlink -m $CAPSTONE_SRC`
+LIBJAYLINK_SRC=`readlink -m $LIBJAYLINK_SRC`
 ZLIB_SRC=`readlink -m $ZLIB_SRC`
 
 HOST_TRIPLET=$1
@@ -57,6 +59,7 @@ HIDAPI_BUILD_DIR=$BUILD_DIR/hidapi
 LIBFTDI_BUILD_DIR=$BUILD_DIR/libftdi
 CAPSTONE_BUILD_DIR=$BUILD_DIR/capstone
 ZLIB_BUILD_DIR=$BUILD_DIR/zlib
+LIBJAYLINK_BUILD_DIR=$BUILD_DIR/libjaylink
 OPENOCD_BUILD_DIR=$BUILD_DIR/openocd
 
 ## Root of host file tree
@@ -106,6 +109,18 @@ if [ -d $LIBUSB1_SRC ] ; then
   $LIBUSB1_SRC/configure --build=`$LIBUSB1_SRC/config.guess` --host=$HOST_TRIPLET \
   --with-sysroot=$SYSROOT --prefix=$PREFIX \
   $LIBUSB1_CONFIG
+  make -j $MAKE_JOBS
+  make install DESTDIR=$SYSROOT
+  ls -la ${SYSROOT}${PREFIX}/lib
+fi
+
+# libjaylink build & install into sysroot
+if [ -d $LIBJAYLINK_SRC ] ; then
+  mkdir -p $LIBJAYLINK_BUILD_DIR
+  cd $LIBJAYLINK_BUILD_DIR
+  $LIBJAYLINK_SRC/configure --build=`$LIBJAYLINK_SRC/config.guess` --host=$HOST_TRIPLET \
+    --with-sysroot=$SYSROOT --prefix=$PREFIX \
+    $LIBJAYLINK_CONFIG
   make -j $MAKE_JOBS
   make install DESTDIR=$SYSROOT
   ls -la ${SYSROOT}${PREFIX}/lib

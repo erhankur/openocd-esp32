@@ -64,6 +64,16 @@ jobs:
           wget https://zlib.net/fossils/zlib-${ZLIB_VER}.tar.gz
           tar -xzf zlib-${ZLIB_VER}.tar.gz
           echo "ZLIB_SRC=$PWD/zlib-${ZLIB_VER}" >> $GITHUB_ENV
+      - name: Prepare libjaylink
+        env:
+          LIBJAYLINK_VER: 0.3.1
+        run: |
+          mkdir -p $DL_DIR && cd $DL_DIR
+          wget https://gitlab.zapb.de/libjaylink/libjaylink/-/archive/${LIBJAYLINK_VER}/libjaylink-${LIBJAYLINK_VER}.tar.gz --no-check-certificate 
+          tar -xzf libjaylink-${LIBJAYLINK_VER}.tar.gz
+          cd libjaylink-${LIBJAYLINK_VER}
+          ./autogen.sh
+          echo "LIBJAYLINK_SRC=$PWD" >> $GITHUB_ENV
       - name: Package OpenOCD for windows
         env:
           MAKE_JOBS: 2
@@ -72,6 +82,7 @@ jobs:
           HIDAPI_CONFIG: --enable-shared --disable-static --disable-testgui
           LIBFTDI_CONFIG: -DSTATICLIBS=OFF -DEXAMPLES=OFF -DFTDI_EEPROM=OFF
           CAPSTONE_CONFIG: "CAPSTONE_BUILD_CORE_ONLY=yes CAPSTONE_STATIC=yes CAPSTONE_SHARED=no"
+          LIBJAYLINK_CONFIG: --enable-shared --disable-static
         run: |
           # check if there is tag pointing at HEAD, otherwise take the HEAD SHA-1 as OPENOCD_TAG
           OPENOCD_TAG="`git tag --points-at HEAD`"
@@ -84,7 +95,7 @@ jobs:
           # set env and call cross-build.sh
           export OPENOCD_TAG=$OPENOCD_TAG
           export OPENOCD_SRC=$PWD
-          export OPENOCD_CONFIG="--disable-esp-compression --enable-internal-libjaylink"
+          export OPENOCD_CONFIG="--disable-esp-compression"
           mkdir -p $BUILD_DIR &&  cd $BUILD_DIR
           bash $OPENOCD_SRC/contrib/cross-build.sh $HOST
           # add missing dlls
