@@ -253,6 +253,138 @@ static const struct stack_register_offset esp32_callee_saved[] = {
 	{ 104, -1, 32 },		/* fsr */
 };
 
+static const struct stack_register_offset esp32s3_callee_saved[] = {
+	{ 0, 32, 32 },			/* PC */
+	{ 1, 36, 32 },			/* A0 */
+	{ 2, 40, 32 },			/* A1 */
+	{ 3, 44, 32 },			/* A2 */
+	{ 4, 48, 32 },			/* A3 */
+	{ 5, 52, 32 },			/* A4 */
+	{ 6, 56, 32 },			/* A5 */
+	{ 7, 60, 32 },			/* A6 */
+	{ 8, 64, 32 },			/* A7 */
+	{ 9, 68, 32 },			/* A8 */
+	{ 10, 72, 32 },			/* A9 */
+	{ 11, 76, 32 },			/* A10 */
+	{ 12, 80, 32 },			/* A11 */
+	{ 13, 84, 32 },			/* A12 */
+	{ 14, 88, 32 },			/* A13 */
+	{ 15, 92, 32 },			/* A14 */
+	{ 16, 96, 32 },			/* A15 */
+	/* A16-A63 aren't in the stack frame because they've been flushed to the stack earlier */
+	{ 17, -1, 32 },			/* A16 */
+	{ 18, -1, 32 },			/* A17 */
+	{ 19, -1, 32 },			/* A18 */
+	{ 20, -1, 32 },			/* A19 */
+	{ 21, -1, 32 },			/* A20 */
+	{ 22, -1, 32 },			/* A21 */
+	{ 23, -1, 32 },			/* A22 */
+	{ 24, -1, 32 },			/* A23 */
+	{ 25, -1, 32 },			/* A24 */
+	{ 26, -1, 32 },			/* A25 */
+	{ 27, -1, 32 },			/* A26 */
+	{ 28, -1, 32 },			/* A27 */
+	{ 29, -1, 32 },			/* A28 */
+	{ 30, -1, 32 },			/* A29 */
+	{ 31, -1, 32 },			/* A30 */
+	{ 32, -1, 32 },			/* A31 */
+	{ 33, -1, 32 },			/* A32 */
+	{ 34, -1, 32 },			/* A33 */
+	{ 35, -1, 32 },			/* A34 */
+	{ 36, -1, 32 },			/* A35 */
+	{ 37, -1, 32 },			/* A36 */
+	{ 38, -1, 32 },			/* A37 */
+	{ 39, -1, 32 },			/* A38 */
+	{ 40, -1, 32 },			/* A39 */
+	{ 41, -1, 32 },			/* A40 */
+	{ 42, -1, 32 },			/* A41 */
+	{ 43, -1, 32 },			/* A42 */
+	{ 44, -1, 32 },			/* A43 */
+	{ 45, -1, 32 },			/* A44 */
+	{ 46, -1, 32 },			/* A45 */
+	{ 47, -1, 32 },			/* A46 */
+	{ 48, -1, 32 },			/* A47 */
+	{ 49, -1, 32 },			/* A48 */
+	{ 50, -1, 32 },			/* A49 */
+	{ 51, -1, 32 },			/* A50 */
+	{ 52, -1, 32 },			/* A51 */
+	{ 53, -1, 32 },			/* A52 */
+	{ 54, -1, 32 },			/* A53 */
+	{ 55, -1, 32 },			/* A54 */
+	{ 56, -1, 32 },			/* A55 */
+	{ 57, -1, 32 },			/* A56 */
+	{ 58, -1, 32 },			/* A57 */
+	{ 59, -1, 32 },			/* A58 */
+	{ 60, -1, 32 },			/* A59 */
+	{ 61, -1, 32 },			/* A60 */
+	{ 62, -1, 32 },			/* A61 */
+	{ 63, -1, 32 },			/* A62 */
+	{ 64, -1, 32 },			/* A63 */
+	{ 65, 20, 32 },			/* lbeg */
+	{ 66, 16, 32 },			/* lend */
+	{ 67, 12, 32 },			/* lcount */
+	{ 68, 24, 32 },			/* SAR */
+	{ 69, -1, 32 },			/* windowbase */
+	{ 70, -1, 32 },			/* windowstart */
+	{ 71, -1, 32 },			/* configid0 */
+	{ 72, -1, 32 },			/* configid1 */
+	{ 73, 24, 32 },			/* PS */
+	{ 74,  0, 32 },			/* threadptr */
+	{ 75, -1, 32 },			/* br */
+	{ 76,  4, 32 },			/* scompare1 */
+	{ 77, -1, 32 },			/* acclo */
+	{ 78, -1, 32 },			/* acchi */
+	{ 79, -1, 32 },			/* m0 */
+	{ 80, -1, 32 },			/* m1 */
+	{ 81, -1, 32 },			/* m2 */
+	{ 82, -1, 32 },			/* m3 */
+	{ 83, -1, 32 },			/* gpio_out */
+	{ 84, -1, 32 },			/* f0 */
+	{ 85, -1, 32 },			/* f1 */
+	{ 86, -1, 32 },			/* f2 */
+	{ 87, -1, 32 },			/* f3 */
+	{ 88, -1, 32 },			/* f4 */
+	{ 89, -1, 32 },			/* f5 */
+	{ 90, -1, 32 },			/* f6 */
+	{ 91, -1, 32 },			/* f7 */
+	{ 92, -1, 32 },			/* f8 */
+	{ 93, -1, 32 },			/* f9 */
+	{ 94, -1, 32 },			/* f10 */
+	{ 95, -1, 32 },			/* f11 */
+	{ 96, -1, 32 },			/* f12 */
+	{ 97, -1, 32 },			/* f13 */
+	{ 98, -1, 32 },			/* f14 */
+	{ 99, -1, 32 },			/* f15 */
+	{ 100, -1, 32 },		/* fcr */
+	{ 101, -1, 32 },		/* fsr */
+	{ 102, -1, 32 },		/* accx_0 */
+	{ 103, -1, 32 },		/* accx_1 */
+	{ 104, -1, 32 },		/* qacc_h_0 */
+	{ 105, -1, 32 },		/* qacc_h_1 */
+	{ 106, -1, 32 },		/* qacc_h_2 */
+	{ 107, -1, 32 },		/* qacc_h_3 */
+	{ 108, -1, 32 },		/* qacc_h_4 */
+	{ 109, -1, 32 },		/* qacc_l_0 */
+	{ 110, -1, 32 },		/* qacc_l_1 */
+	{ 111, -1, 32 },		/* qacc_l_2 */
+	{ 112, -1, 32 },		/* qacc_l_3 */
+	{ 113, -1, 32 },		/* qacc_l_4 */
+	{ 114, -1, 32 },		/* sar_byte */
+	{ 115, -1, 32 },		/* fft_bit_width */
+	{ 116, -1, 32 },		/* ua_state_0 */
+	{ 117, -1, 32 },		/* ua_state_1 */
+	{ 118, -1, 32 },		/* ua_state_2 */
+	{ 119, -1, 32 },		/* ua_state_3 */
+	{ 120, -1, 32 },		/* q0 */
+	{ 121, -1, 32 },		/* q1 */
+	{ 122, -1, 32 },		/* q2 */
+	{ 123, -1, 32 },		/* q3 */
+	{ 124, -1, 32 },		/* q4 */
+	{ 125, -1, 32 },		/* q5 */
+	{ 126, -1, 32 },		/* q6 */
+	{ 127, -1, 32 },		/* q7 */
+};
+
 static const struct rtos_register_stacking arm_callee_saved_stacking = {
 	.stack_registers_size = 36,
 	.stack_growth_direction = -1,
@@ -281,6 +413,14 @@ static const struct rtos_register_stacking esp32_callee_saved_stacking = {
 	.num_output_registers = ARRAY_SIZE(esp32_callee_saved),
 	.calculate_process_stack = rtos_generic_stack_align8,
 	.register_offsets = esp32_callee_saved,
+};
+
+static const struct rtos_register_stacking esp32s3_callee_saved_stacking = {
+	.stack_registers_size = 96,
+	.stack_growth_direction = -1,
+	.num_output_registers = ARRAY_SIZE(esp32s3_callee_saved),
+	.calculate_process_stack = rtos_generic_stack_align8,
+	.register_offsets = esp32s3_callee_saved,
 };
 
 static const struct stack_register_offset arm_cpu_saved[] = {
@@ -512,7 +652,7 @@ static int zephyr_get_riscv_state(struct rtos *rtos, target_addr_t *addr,
 			num_regs);
 }
 
-static int zephyr_get_esp32_state(struct rtos *rtos, target_addr_t *addr,
+static int zephyr_get_xtensa_state(struct rtos *rtos, target_addr_t *addr,
 			 struct zephyr_params *params,
 			 struct rtos_reg *callee_saved_reg_list,
 			 struct rtos_reg **reg_list, int *num_regs)
@@ -573,7 +713,13 @@ static struct zephyr_params zephyr_params_list[] = {
 		.target_name = "esp32",
 		.pointer_width = 4,
 		.callee_saved_stacking = &esp32_callee_saved_stacking,
-		.get_cpu_state = &zephyr_get_esp32_state,
+		.get_cpu_state = &zephyr_get_xtensa_state,
+	},
+	{
+		.target_name = "esp32s3",
+		.pointer_width = 4,
+		.callee_saved_stacking = &esp32s3_callee_saved_stacking,
+		.get_cpu_state = &zephyr_get_xtensa_state,
 	},
 	{
 		.target_name = "esp32c2",
