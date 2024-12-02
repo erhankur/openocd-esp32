@@ -11,15 +11,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: install deps
         run: brew install automake texinfo coreutils
-      - uses: ./.github/actions/common-build-steps
+      - name: Build and Upload OpenOCD artifact
+        uses: ./.github/actions/common-build-steps
         with:
           arch: macos-x86
-          openocd_configure_opts: "--disable-doxygen-html --enable-remote-bitbang"
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: openocd-macos-x86
-          path: ${{ env.ARTIFACT_PATH }}/*
 
   build-macos-arm64:
     runs-on: macos-latest
@@ -27,15 +22,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: install deps
         run: brew install automake libtool texinfo coreutils
-      - uses: ./.github/actions/common-build-steps
+      - name: Build and Upload OpenOCD artifact
+        uses: ./.github/actions/common-build-steps
         with:
           arch: macos-arm64
-          openocd_configure_opts: "--disable-doxygen-html --enable-remote-bitbang"
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: openocd-macos-arm64
-          path: ${{ env.ARTIFACT_PATH }}/*
 
   build-linux:
     runs-on: ubuntu-20.04
@@ -43,15 +33,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: install deps
         run: sudo apt-get install libudev-dev systemd --force-yes -y
-      - uses: ./.github/actions/common-build-steps
+      - name: Build and Upload OpenOCD artifact
+        uses: ./.github/actions/common-build-steps
         with:
           arch: linux
-          openocd_configure_opts: "--disable-doxygen-html --enable-remote-bitbang"
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: openocd-linux
-          path: ${{ env.ARTIFACT_PATH }}/*
 
   build-windows:
     runs-on: ubuntu-20.04
@@ -59,12 +44,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: install deps
         run: sudo apt-get install libtool-bin libudev-dev gcc-mingw-w64-i686
-      - uses: ./.github/actions/common-build-steps
+      - name: Build and Upload OpenOCD artifact
+        uses: ./.github/actions/common-build-steps
         with:
           arch: windows
-          openocd_configure_opts: "--disable-doxygen-html --enable-remote-bitbang"
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: openocd-windows
-          path: ${{ env.ARTIFACT_PATH }}/*

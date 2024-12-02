@@ -2,8 +2,6 @@ name: Common Build Steps for Windows, Linux and Macos
 inputs:
   arch:
     required: true
-  openocd_configure_opts:
-    required: true
 runs:
   using: "composite"
   steps:
@@ -12,7 +10,7 @@ runs:
       env:
         ARCH: ${{ inputs.arch }}
         BUILD_DIR: build
-        OPENOCD_CONFIGURE_OPTS: ${{ inputs.openocd_configure_opts }}
+        OPENOCD_CONFIGURE_OPTS: "--disable-doxygen-html --enable-remote-bitbang"
       run: |
         mkdir -p $BUILD_DIR
         export PREFIX="$(realpath $BUILD_DIR)/opt"
@@ -76,3 +74,9 @@ runs:
         fi
 
         echo "ARTIFACT_PATH=$PREFIX/openocd" >> $GITHUB_ENV
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: openocd-${{ inputs.arch }}
+        path: ${{ env.ARTIFACT_PATH }}/*
