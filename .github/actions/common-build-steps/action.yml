@@ -21,11 +21,20 @@ runs:
           export LDFLAGS="-Wl,-framework,CoreFoundation -Wl,-framework,IOKit -Wl,-framework,Security"
         fi
 
+        # Set platform-specific variables
+        if [[ "$ARCH" == "windows" ]]; then
+          export CONF_HOST="i686-w64-mingw32"
+          export HOST_CC="${CONF_HOST}-gcc"
+        else
+          export CONF_HOST=""
+          export HOST_CC="gcc"
+        fi
+
         # LIBUSB
         export LIBUSB_VER=libusb-1.0.26
         cd $DL_DIR && wget https://dl.espressif.com/dl/$LIBUSB_VER.tar.gz -O $LIBUSB_VER.tar.gz
         tar xzf $LIBUSB_VER.tar.gz && rm $LIBUSB_VER.tar.gz && pushd $LIBUSB_VER && ./bootstrap.sh
-        ./configure --prefix="$PREFIX" --enable-shared=no --enable-static=yes
+        ./configure --prefix="$PREFIX" --host=${CONF_HOST} --enable-shared=no --enable-static=yes CC=${HOST_CC}
         make install
         export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
         popd
@@ -34,7 +43,7 @@ runs:
         export HIDAPI_VER=hidapi-0.14.0
         cd $DL_DIR && wget https://dl.espressif.com/dl/hidapi-$HIDAPI_VER.tar.gz -O $HIDAPI_VER.tar.gz
         tar xzf $HIDAPI_VER.tar.gz && rm $HIDAPI_VER.tar.gz && pushd hidapi-$HIDAPI_VER && ./bootstrap
-        ./configure --prefix="$PREFIX" --enable-shared=no --enable-static=yes --disable-testgui CFLAGS=-std=gnu99
+        ./configure --prefix="$PREFIX" --host=${CONF_HOST} --enable-shared=no --enable-static=yes --disable-testgui CC=${HOST_CC} CFLAGS=-std=gnu99
         make install
         popd
 
@@ -43,17 +52,12 @@ runs:
         cd $DL_DIR && wget https://dl.espressif.com/dl/$LIBJAYLINK_VER.tar.gz -O $LIBJAYLINK_VER.tar.gz
         tar xzf $LIBJAYLINK_VER.tar.gz && rm $LIBJAYLINK_VER.tar.gz && pushd $LIBJAYLINK_VER
         ./autogen.sh
-        ./configure --prefix="$PREFIX" --disable-shared
+        ./configure --prefix="$PREFIX" --host=${CONF_HOST} --disable-shared CC=${HOST_CC}
         make install
         popd
 
-        # Platform-specific configurations
+        # ZLIB (Windows only)
         if [[ $ARCH == "windows" ]]; then
-          export CONF_HOST="i686-w64-mingw32"
-          export PLATFORM_NAME="win32"
-          export HOST_CC=${CONF_HOST}-gcc
-
-          # ZLIB (Windows only)
           export ZLIB_VER=zlib-1.2.11
           cd $DL_DIR && wget https://dl.espressif.com/dl/$ZLIB_VER.tar.xz -O $ZLIB_VER.tar.xz
           tar xf $ZLIB_VER.tar.xz && rm $ZLIB_VER.tar.xz && pushd $ZLIB_VER
@@ -65,7 +69,7 @@ runs:
 
         cd $PREFIX/../..
         ./bootstrap
-        ./configure --prefix="$PREFIX/openocd" $OPENOCD_CONFIGURE_OPTS
+        ./configure --prefix="$PREFIX/openocd" --host=${CONF_HOST} $OPENOCD_CONFIGURE_OPTS CC=${HOST_CC}
         make -j $(nproc)
         make install-strip
 
