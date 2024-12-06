@@ -5,7 +5,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: build
+    - name: Prepare build environment
       shell: bash
       env:
         ARCH: ${{ inputs.arch }}
@@ -30,7 +30,9 @@ runs:
           export HOST_CC="gcc"
         fi
 
-        # LIBUSB
+    - name: Build LIBUSB
+      shell: bash
+      run: |
         export LIBUSB_VER=libusb-1.0.26
         cd $DL_DIR && wget https://dl.espressif.com/dl/$LIBUSB_VER.tar.gz -O $LIBUSB_VER.tar.gz
         tar xzf $LIBUSB_VER.tar.gz && rm $LIBUSB_VER.tar.gz && pushd $LIBUSB_VER && ./bootstrap.sh
@@ -39,7 +41,9 @@ runs:
         export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
         popd
 
-        # HIDAPI
+    - name: Build HIDAPI
+      shell: bash
+      run: |
         export HIDAPI_VER=hidapi-0.14.0
         cd $DL_DIR && wget https://dl.espressif.com/dl/hidapi-$HIDAPI_VER.tar.gz -O $HIDAPI_VER.tar.gz
         tar xzf $HIDAPI_VER.tar.gz && rm $HIDAPI_VER.tar.gz && pushd hidapi-$HIDAPI_VER && ./bootstrap
@@ -47,7 +51,9 @@ runs:
         make install
         popd
 
-        # LIBJAYLINK
+    - name: Build LIBJAYLINK
+      shell: bash
+      run: |
         export LIBJAYLINK_VER=libjaylink-0.3.1
         cd $DL_DIR && wget https://dl.espressif.com/dl/$LIBJAYLINK_VER.tar.gz -O $LIBJAYLINK_VER.tar.gz
         tar xzf $LIBJAYLINK_VER.tar.gz && rm $LIBJAYLINK_VER.tar.gz && pushd $LIBJAYLINK_VER
@@ -56,7 +62,9 @@ runs:
         make install
         popd
 
-        # ZLIB (Windows only)
+    - name: Build ZLIB
+      shell: bash
+      run: |
         if [[ $ARCH == "windows" ]]; then
           export ZLIB_VER=zlib-1.2.11
           cd $DL_DIR && wget https://dl.espressif.com/dl/$ZLIB_VER.tar.xz -O $ZLIB_VER.tar.xz
@@ -65,22 +73,24 @@ runs:
           export CPPFLAGS="-I$PREFIX/include/zlib"
           export LDFLAGS="-L$PREFIX/lib"
           popd
+        else
+          echo "Skipping ZLIB build: Not on Windows platform"
         fi
-
+    - name: Build OpenOCD
+      shell: bash
+      run: |
         cd $PREFIX/../..
         ./bootstrap
         ./configure --prefix="$PREFIX/openocd" --host=${CONF_HOST} $OPENOCD_CONFIGURE_OPTS CC=${HOST_CC}
         make -j $(nproc)
         make install-strip
-
         if [[ $ARCH == "windows" ]]; then
           cp $PREFIX/lib/zlib1.dll $PREFIX/openocd/bin
         fi
-
         echo "ARTIFACT_PATH=$PREFIX/openocd" >> $GITHUB_ENV
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: openocd-${{ inputs.arch }}
+        name: openocd-$ARCH
         path: ${{ env.ARTIFACT_PATH }}/*
