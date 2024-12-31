@@ -979,14 +979,27 @@ int esp_algo_flash_probe(struct flash_bank *bank)
 		bank->sectors = NULL;
 	}
 
-	int ret = esp_algo_flash_get_mappings(bank,
-		esp_info,
-		&flash_map,
-		esp_info->appimage_flash_base);
+	int ret = ERROR_OK;
+	if (esp_info->flash_map_set) {
+		memcpy(&flash_map, &esp_info->flash_map, sizeof(flash_map));
+		for (size_t i = 0; i < flash_map.map.maps_num; ++i) {
+			LOG_INFO("Flash mapping %zu: 0x%x -> 0x%x, %d KB",
+					i,
+					flash_map.map.maps[i].phy_addr,
+					flash_map.map.maps[i].load_addr,
+					flash_map.map.maps[i].size / 1024);
+		}
+	} else {
+		ret = esp_algo_flash_get_mappings(bank,
+			esp_info,
+			&flash_map,
+			esp_info->appimage_flash_base);
+	}
+
 	if (ret != ERROR_OK || flash_map.map.maps_num == 0) {
 		LOG_WARNING("Failed to get flash mappings (%d)!", ret);
 		/* if no DROM/IROM mappings so pretend they are at the end of the HW flash bank and
-		 * have zero size to allow correct memory map with non zero RAM region */
+		* have zero size to allow correct memory map with non zero RAM region */
 		irom_base = flash_map.flash_size;
 		drom_base = flash_map.flash_size;
 	} else {
@@ -1460,6 +1473,55 @@ static int esp_algo_target_to_flash_bank(struct target *target,
 	return ERROR_OK;
 }
 
+static int esp_algo_set_flash_mappings_for_bank(struct command_invocation *cmd,
+	struct target *target, char *bank_name_suffix)
+{
+	struct flash_bank *bank;
+	struct esp_flash_bank *esp_info;
+
+	int retval = esp_algo_target_to_flash_bank(target, &bank, bank_name_suffix, false);
+	if (retval != ERROR_OK)
+		return ERROR_FAIL;
+
+	esp_info = (struct esp_flash_bank *)bank->driver_priv;
+
+	/* DROM */
+	COMMAND_PARSE_NUMBER(u32, CMD_ARGV[0], esp_info->flash_map.map.maps[0].phy_addr);
+	COMMAND_PARSE_NUMBER(u32, CMD_ARGV[1], esp_info->flash_map.map.maps[0].load_addr);
+	COMMAND_PARSE_NUMBER(u32, CMD_ARGV[2], esp_info->flash_map.map.maps[0].size);
+
+	/* IROM */
+	COMMAND_PARSE_NUMBER(u32, CMD_ARGV[3], esp_info->flash_map.map.maps[1].phy_addr);
+	COMMAND_PARSE_NUMBER(u32, CMD_ARGV[4], esp_info->flash_map.map.maps[1].load_addr);
+	COMMAND_PARSE_NUMBER(u32, CMD_ARGV[5], esp_info->flash_map.map.maps[1].size);
+
+	/* FLASH */
+	COMMAND_PARSE_NUMBER(u32, CMD_ARGV[8], esp_info->flash_map.flash_size);
+
+	esp_info->flash_map.map.maps_num = 2;
+	esp_info->flash_map_set = 1;
+
+	return ERROR_OK;
+}
+
+static COMMAND_HELPER(esp_algo_set_flash_mappings_do, struct target *target)
+{
+	if (CMD_ARGC != 9) {
+		LOG_ERROR("usage: <drom_paddr><drom_vaddr><drom_size><irom_paddr><irom_vaddr><irom_size>"
+				"<flash_paddr><flash_vaddr><flash_size>");
+		return ERROR_COMMAND_SYNTAX_ERROR;;
+	}
+
+	int ret = esp_algo_set_flash_mappings_for_bank(CMD, target, "irom");
+	if (ret != ERROR_OK)
+		return ret;
+	ret = esp_algo_set_flash_mappings_for_bank(CMD, target, "drom");
+	if (ret != ERROR_OK)
+		return ret;
+
+	return esp_algo_set_flash_mappings_for_bank(CMD, target, "flash");
+}
+
 static int esp_algo_flash_appimage_base_update(struct target *target,
 	char *bank_name_suffix,
 	uint32_t appimage_flash_base)
@@ -1754,6 +1816,7 @@ COMMAND_HANDLER_SMP(esp_algo_flash_cmd_stub_log, esp_algo_flash_parse_cmd_stub_l
 COMMAND_HANDLER_SMP(esp_algo_flash_cmd_encryption, esp_algo_flash_cmd_set_encryption)
 COMMAND_HANDLER_SMP(esp_algo_flash_cmd_compression, esp_algo_flash_cmd_set_compression)
 COMMAND_HANDLER_SMP(esp_algo_flash_cmd_appimage_flashoff, esp_algo_flash_cmd_appimage_flashoff_do)
+COMMAND_HANDLER_SMP(esp_algo_set_flash_mappings, esp_algo_set_flash_mappings_do)
 
 const struct command_registration esp_flash_exec_flash_command_handlers[] = {
 	{
@@ -1803,6 +1866,13 @@ const struct command_registration esp_flash_exec_flash_command_handlers[] = {
 		.mode = COMMAND_ANY,
 		.help = "Enable stub flasher logs",
 		.usage = "['on'|'off']",
+	},
+	{
+		.name = "flash_map",
+		.handler = esp_algo_set_flash_mappings,
+		.mode = COMMAND_ANY,
+		.help = "Set flash banks mapping addresses",
+		.usage = "",
 	},
 	COMMAND_REGISTRATION_DONE
 };

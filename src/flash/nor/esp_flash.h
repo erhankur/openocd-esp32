@@ -12,6 +12,7 @@
 #include <target/espressif/esp_algorithm.h>
 #include <target/breakpoints.h>
 #include <flash/nor/core.h>
+#include "contrib/loaders/flash/espressif/stub_flasher.h"
 
 struct esp_flash_apptrace_hw {
 	int (*info_init)(struct target *target,
@@ -95,6 +96,9 @@ struct esp_flash_bank {
 	bool stub_log_enabled;
 	/* If exist at the target memory, allow to run preloaded stub code without loading again */
 	bool check_preloaded_binary;
+	/* manuel mapping address for drom, irom and flash banks */
+	bool flash_map_set;
+	struct esp_stub_flash_map flash_map;
 };
 
 enum esp_flash_bp_action {
