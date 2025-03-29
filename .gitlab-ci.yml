@@ -2,6 +2,9 @@ stages:
   - pre_check
   - static_analyzers
   - build_openocd
+  - stub_build_test
+  - run_test_pipelines
+  - results
 
 image: $CI_DOCKER_REGISTRY/openocd-ci-env:1
 
@@ -323,3 +326,5 @@ include:
   - '.gitlab/ci/util.yml'
   - '.gitlab/ci/build.yml'
   - '.gitlab/ci/pre-check.yml'
+  - '.gitlab/ci/test-stub.yml'
+  - '.gitlab/ci/run-pipeline.yml'

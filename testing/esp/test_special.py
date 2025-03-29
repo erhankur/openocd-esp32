@@ -154,7 +154,7 @@ class DebuggerSpecialTestsImpl:
             # avoid simultaneous access to UART with SerialReader
             if self.uart_reader:
                 self.uart_reader.pause()
-            cmd = ['esptool.py', *esptool_args, 'write_flash', *flasher_args]
+            cmd = ['esptool.py', '-s', *esptool_args, 'write_flash', *flasher_args]
             proc = subprocess.run(cmd, cwd=self.test_app_cfg.build_bins_dir())
             proc.check_returncode()
             if self.uart_reader:
@@ -194,9 +194,9 @@ class DebuggerSpecialTestsImpl:
                             "Halt cause (6) - (Integer divide by zero)"]
         else: 
             sub_tests = ["illegal_instruction", "load_access_fault", "store_access_fault"]
-            expected_strings = ["Halt cause (2) - (Illegal Instruction)",
+            expected_strings = ["Halt cause (2) - (Illegal instruction)",
                                 "Halt cause (5) - (PMP Load access fault)",
-                                "Halt cause (7) - (PMP Store access fault)"]
+                                "Halt cause (7) - (Store access fault)"]
 
         if testee_info.arch == "xtensa":
             bps.append("exception_bp_5")
@@ -260,7 +260,7 @@ class DebuggerSpecialTestsImpl:
                                 break
                     self.assertTrue(found_line_count)
             else:
-               self.assertTrue(expected_strings[i] in target_output)
+                self.assertTrue(expected_strings[i] in target_output)
             self.gdb.target_reset()
             self.add_bp('app_main')
             self.run_to_bp(dbg.TARGET_STOP_REASON_BP, 'app_main')
