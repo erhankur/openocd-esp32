@@ -2,16 +2,6 @@ stages:
   - pre_check
   - static_analyzers
   - build_openocd
-  - run_test_pipelines
-  - build_nuttx
-  - test_host
-  - test_nuttx
-  - results
-  - deploy
-  - pre_release
-  - release_stage1
-  - release_submit
-  - update_idf_tools
 
 image: $CI_DOCKER_REGISTRY/openocd-ci-env:1
 
@@ -54,37 +44,6 @@ variables:
   ARCHIVE_TOOL: "tar czf"
   ARCHIVE_EXT: "tar.gz"
   RELEASE_DESC: "New release"
-
-# prefix should be like a $CI_PROJECT_NAME, but we cannot use variable here
-.release_tag_filter: &release_tag_filter
-  only:
-    - /^v[0-9].*$/
-    - /^openocd-esp32-.*$/
-
-.release_binaries: &release_binaries
-  needs:
-    - job: build_linux
-    - job: build_linux_armhf
-    - job: build_linux_armel
-    - job: build_linux_arm64
-    - job: build_windows_win32
-    - job: build_windows_win64
-    - job: macos_codesign
-    #- job: build_windows_arm64
-
-.release_submit_action: &release_submit_action
-  image: espressif/github-hub:2
-  when: manual
-  allow_failure: true
-  before_script:
-    - set -o errexit; set -o pipefail; set -o nounset
-    - test "${DEBUG_SHELL:-''}" = "1" && set -x
-    - git remote remove github || true
-    - git remote add github ${GH_REPO_HTTPS}
-  variables:
-    GIT_STRATEGY: fetch
-    GH_REL_TAG: ${CI_COMMIT_TAG}
-    SHA256_FILE: openocd-esp32-${CI_COMMIT_TAG}-checksum.sha256
 
 before_script:
   - set -o errexit; set -o pipefail; set -o nounset
@@ -363,8 +322,4 @@ update_idf_tools:
 include:
   - '.gitlab/ci/util.yml'
   - '.gitlab/ci/build.yml'
-  - '.gitlab/ci/test-template.yml'
   - '.gitlab/ci/pre-check.yml'
-  - '.gitlab/ci/nuttx.yml'
-  - '.gitlab/ci/host-test.yml'
-  - '.gitlab/ci/run-pipeline.yml'
