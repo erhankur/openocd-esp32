@@ -21,6 +21,13 @@
   export BATCH_BUILD=1
   export V=0
 
+  export CCACHE_DIR="${CCACHE_DIR:-${CI_PROJECT_DIR}/.ccache-idf}"
+  mkdir -p "$CCACHE_DIR"
+  if command -v ccache >/dev/null 2>&1; then
+    ccache -M 2G 2>/dev/null || true
+    ccache -s 2>/dev/null || true
+  fi
+
   IDF_REPO_URL="https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}:${CI_SERVER_PORT}/espressif/esp-idf.git"
 
   # -----------------------------
@@ -151,6 +158,12 @@
   variables:
     UT_GET_IDF_VER: "1"
     TEST_APP_CONFIGS: ""
+    IDF_CCACHE_ENABLE: "1"
+    CCACHE_DIR: "${CI_PROJECT_DIR}/.ccache-idf"
+  cache:
+    key: "idf-gen-ut-ccache-${CI_JOB_NAME}"
+    paths:
+      - .ccache-idf/
   artifacts:
     paths:
       - $BUILD_TEST_APP_DIR/gen_ut_app/builds/*/lp_core_main.elf
@@ -227,4 +240,5 @@
     TEST_APP_IDF_DOCKER_IMAGE: "${TEST_APP_IDF_LATEST_DOCKER_IMAGE}"
     BUILD_TEST_APP_DIR: "build_test_app_${CHIP_NAME}"
     UT_GET_IDF_VER: "0"
+    TEST_APP_IDF_LATEST_SYNC_FROM_GITLAB: "0"
   extends: .build_test_app_template

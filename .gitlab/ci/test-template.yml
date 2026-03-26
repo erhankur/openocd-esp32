@@ -8,6 +8,7 @@
     OOCD_CMDS: "set VAR 1" # default command to avoid missing argument error.
     TEST_RUN_EXTRA_OPTS: "-r -i ${IDF_RELEASE_TAG} ${TEST_RUN_BOARD_OPTS}"
     ESPTOOL_PORT: "/dev/serial_ports/ttyUSB-esp32"
+    MERGED_BIN: "/cache/merged-binary.bin"
   artifacts:
     paths:
       - $TEST_RUN_DIR/debug_backend_tests.log
@@ -42,6 +43,13 @@
       fi;
       if [[ $IDF_RELEASE_TAG != "latest" || $CI_FULL_RUN != "1" ]] ; then
         export TEST_RUN_EXTRA_OPTS="${TEST_RUN_EXTRA_OPTS} -e *.*.test_big_binary *.*.test_big_binary_compressed";
+      fi
+    - >
+      if [[ -n "${MERGED_BIN}" && -f "${MERGED_BIN}" ]]; then
+        echo "Flashing ${MERGED_BIN} to target via ${ESPTOOL_PORT}";
+        esptool -s -p ${ESPTOOL_PORT} --chip ${CHIP_NAME} write-flash 0x0 ${MERGED_BIN};
+        echo "Waiting for target to boot...";
+        sleep 1;
       fi
   script:
     - !reference [.submodules_mirror_update, script]
